@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.ingestion.router import router as ingestion_router
 from app.projects.router import router as projects_router
+from app.search.router import router as search_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -28,6 +29,7 @@ app.add_middleware(
 
 app.include_router(projects_router, prefix="/projects", tags=["projects"])
 app.include_router(ingestion_router, prefix="/projects", tags=["ingestion"])
+app.include_router(search_router, prefix="/projects", tags=["search"])
 
 
 @app.on_event("startup")
