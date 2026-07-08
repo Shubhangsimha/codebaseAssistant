@@ -1,0 +1,53 @@
+# Web framework
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+
+# Database
+sqlalchemy==2.0.36
+aiosqlite==0.20.0
+alembic==1.14.0
+
+# Data validation
+pydantic==2.10.3
+pydantic-settings==2.6.1
+
+# File upload & HTTP
+python-multipart==0.0.19
+httpx==0.28.1
+
+# Environment
+python-dotenv==1.0.1
+
+# Git operations (M1-T08)
+gitpython==3.1.43
+
+# File ignore patterns (M1-T10)
+pathspec==0.12.1
+
+# Code parsing (M2)
+tree-sitter==0.23.2
+tree-sitter-python==0.23.4
+tree-sitter-javascript==0.23.1
+tree-sitter-typescript==0.23.2
+tree-sitter-go==0.23.4
+tree-sitter-java==0.23.5
+tree-sitter-rust==0.23.2
+
+# Tokenisation (M2-T07)
+tiktoken==0.8.0
+
+# Chunking (M2-T08)
+langchain-text-splitters==0.3.3
+
+# Embeddings + vector store (M2-T09 / M2-T10)
+sentence-transformers==3.3.1
+faiss-cpu==1.9.0.post1
+numpy==2.2.0
+
+# LLM SDKs (M3)
+google-generativeai==0.8.3
+groq==0.13.1
+
+# Testing
+pytest==8.3.4
+pytest-asyncio==0.24.0
