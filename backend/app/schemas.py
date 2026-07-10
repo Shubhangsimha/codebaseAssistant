@@ -111,3 +111,13 @@ class ChunkResult(BaseModel):
     line_start: Optional[int]
     line_end: Optional[int]
     score: float
+
+
+# ---------------------------------------------------------------------------
+# Language breakdown schema
+# ---------------------------------------------------------------------------
+
+class LanguageBreakdown(BaseModel):
+    language: str
+    percent: float
+    file_count: int

@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.common import get_project_or_404
 from app.database import get_db
 from app.models import Project
 from app.schemas import ProjectCreate, ProjectResponse
@@ -44,7 +45,7 @@ async def delete_project(
     project_id: int,
     db: AsyncSession = Depends(get_db),
 ) -> None:
-    project = await _get_project_or_404(project_id, db)
+    project = await get_project_or_404(project_id, db)
 
     # Remove FAISS index file if it exists
     if project.faiss_index_path:
@@ -57,14 +58,3 @@ async def delete_project(
 
     await db.delete(project)
     logger.info("Deleted project id=%d", project_id)
-
-
-async def _get_project_or_404(project_id: int, db: AsyncSession) -> Project:
-    result = await db.execute(select(Project).where(Project.id == project_id))
-    project = result.scalar_one_or_none()
-    if project is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Project {project_id} not found",
-        )
-    return project

@@ -7,8 +7,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.config import settings
-from app.ingestion.embedder import Embedder, FAISSStore
+from app.ingestion.embedder import Embedder, FAISSIndex
 from app.models import ProjectChunk
+
+_embedder: Embedder | None = None
+
+
+def _get_embedder() -> Embedder:
+    global _embedder
+    if _embedder is None:
+        _embedder = Embedder()
+    return _embedder
 
 
 async def search(
@@ -17,11 +26,11 @@ async def search(
     db: AsyncSession,
     top_k: int = 8,
 ) -> list[dict]:
-    embedder = Embedder()
+    embedder = _get_embedder()
     query_vec = embedder.embed_batch([query])
 
     data_dir = Path(settings.data_dir)
-    store = FAISSStore.load_for_project(project_id, data_dir)
+    store = FAISSIndex.load_for_project(project_id, data_dir)
     distances, chunk_ids = store.search(query_vec[0], top_k)
 
     if not chunk_ids:

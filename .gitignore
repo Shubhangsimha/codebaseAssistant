@@ -1,7 +1,8 @@
 # Environment
 .env
 .env.local
-
+CODE_REVIEW.md
+SECURITY_AUDIT.md
 # Python
 __pycache__/
 *.pyc
@@ -21,3 +22,6 @@ frontend/.next/
 
 # Docker
 *.log
+papers.md
+novel.md
+points.md

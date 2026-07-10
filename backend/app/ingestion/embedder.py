@@ -33,7 +33,7 @@ class Embedder:
         ).astype(np.float32)
 
 
-class FAISSStore:
+class FAISSIndex:
     def __init__(self, project_id: int, data_dir: Path) -> None:
         self.project_id = project_id
         self._index_path = data_dir / "faiss" / f"{project_id}.faiss"
@@ -84,7 +84,7 @@ class FAISSStore:
         self._meta = {int(k): v for k, v in raw.items()}
 
     @classmethod
-    def load_for_project(cls, project_id: int, data_dir: Path) -> "FAISSStore":
+    def load_for_project(cls, project_id: int, data_dir: Path) -> "FAISSIndex":
         store = cls(project_id, data_dir)
         store.load()
         return store

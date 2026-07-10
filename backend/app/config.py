@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     )
 
     data_dir: str = "./data"
+    allowed_origins: list[str] = ["http://localhost:3000"]
 
     # Optional — warn if absent but do not crash startup
     gemini_api_key: str = ""

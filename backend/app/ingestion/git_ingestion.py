@@ -5,7 +5,7 @@ import git
 
 logger = logging.getLogger(__name__)
 
-_GITHUB_PREFIXES = ("https://github.com/", "http://github.com/", "git@github.com:")
+_GITHUB_PREFIXES = ("https://github.com/",)
 
 
 def clone_repository(repo_url: str, dest_dir: Path) -> Path:
@@ -16,8 +16,8 @@ def clone_repository(repo_url: str, dest_dir: Path) -> Path:
     """
     if not any(repo_url.startswith(p) for p in _GITHUB_PREFIXES):
         raise ValueError(
-            f"Only GitHub URLs are supported (must start with https://github.com/). "
-            f"Got: {repo_url!r}"
+            "Only public GitHub HTTPS URLs are supported "
+            "(must start with https://github.com/)."
         )
 
     # Normalise: strip trailing .git if present

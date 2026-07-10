@@ -1,4 +1,15 @@
-// Project overview — implemented in M4-T08
+"use client";
+
+import { useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+
 export default function ProjectPage() {
-  return <div className="p-8 text-muted-foreground">Project overview coming in Milestone 4.</div>;
+  const { id } = useParams<{ id: string }>();
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace(`/projects/${id}/chat`);
+  }, [id, router]);
+
+  return null;
 }

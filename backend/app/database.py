@@ -22,9 +22,18 @@ DATABASE_URL = f"sqlite+aiosqlite:///{_data_dir / 'codesage.db'}"
 
 engine: AsyncEngine = create_async_engine(
     DATABASE_URL,
-    echo=False,  # set True to see SQL in logs during development
+    echo=False,
     connect_args={"check_same_thread": False},
 )
+
+# Enable WAL mode so concurrent readers don't block the writer.
+from sqlalchemy import event as _sa_event
+from sqlalchemy.engine import Engine as _Engine
+
+@_sa_event.listens_for(engine.sync_engine, "connect")
+def _set_wal_mode(dbapi_conn, _):
+    dbapi_conn.execute("PRAGMA journal_mode=WAL")
+    dbapi_conn.execute("PRAGMA busy_timeout=5000")
 
 AsyncSessionLocal = async_sessionmaker(
     bind=engine,

@@ -146,3 +146,88 @@ export const getLanguageBreakdown = (
   projectId: number
 ): Promise<{ language: string; percent: number; file_count: number }[]> =>
   apiFetch(`/projects/${projectId}/languages`);
+
+// ---------------------------------------------------------------------------
+// Chat endpoints
+// ---------------------------------------------------------------------------
+
+export const getConversations = (
+  projectId: number
+): Promise<ConversationResponse[]> =>
+  apiFetch<ConversationResponse[]>(`/projects/${projectId}/conversations`);
+
+export const getConversationMessages = (
+  projectId: number,
+  conversationId: number
+): Promise<MessageResponse[]> =>
+  apiFetch<MessageResponse[]>(
+    `/projects/${projectId}/conversations/${conversationId}/messages`
+  );
+
+export const getChatStreamUrl = (projectId: number): string =>
+  `${API_BASE}/projects/${projectId}/chat`;
+
+// ---------------------------------------------------------------------------
+// Generation endpoints
+// ---------------------------------------------------------------------------
+
+export interface ArchitectureResult {
+  summary: string;
+  stack: string[];
+  layers: { name: string; description: string; examples: string[] }[];
+}
+
+export interface ApiEndpoint {
+  method: string;
+  path: string;
+  handler: string;
+  description: string;
+}
+
+export const getArchitecture = (projectId: number): Promise<ArchitectureResult> =>
+  apiFetch<ArchitectureResult>(`/projects/${projectId}/architecture`);
+
+export const getApiEndpoints = (projectId: number): Promise<ApiEndpoint[]> =>
+  apiFetch<ApiEndpoint[]>(`/projects/${projectId}/api-endpoints`);
+
+export const getDocstringStreamUrl = (projectId: number, chunkId: number): string =>
+  `${API_BASE}/projects/${projectId}/chunks/${chunkId}/docstring`;
+
+// ---------------------------------------------------------------------------
+// Graph endpoint
+// ---------------------------------------------------------------------------
+
+export interface GraphNode {
+  id: string;
+  data: { label: string; path: string; language: string | null; cyclic: boolean };
+  position: { x: number; y: number };
+  type: string;
+}
+
+export interface GraphEdge {
+  id: string;
+  source: string;
+  target: string;
+  data: { cyclic: boolean };
+  style?: Record<string, string>;
+}
+
+export interface GraphResult {
+  nodes: GraphNode[];
+  edges: GraphEdge[];
+  cycles: string[][];
+}
+
+export const getDependencyGraph = (projectId: number): Promise<GraphResult> =>
+  apiFetch<GraphResult>(`/projects/${projectId}/graph`);
+
+// ---------------------------------------------------------------------------
+// Chunk search (for doc generator function picker)
+// ---------------------------------------------------------------------------
+
+export const searchChunks = (
+  projectId: number,
+  query: string,
+  topK = 10
+): Promise<ChunkResult[]> =>
+  apiFetch<ChunkResult[]>(`/projects/${projectId}/search?q=${encodeURIComponent(query)}&top_k=${topK}`);

@@ -1,10 +1,10 @@
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import get_db
+from app.common import get_project_or_404
+from app.database import AsyncSessionLocal, get_db
 from app.ingestion.pipeline import run_ingestion
 from app.models import Project
 from app.schemas import ProjectStatus
@@ -13,17 +13,29 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
+async def _run_ingestion_background(project_id: int) -> None:
+    """Run the ingestion pipeline in its own DB session (BackgroundTasks context)."""
+    async with AsyncSessionLocal() as db:
+        try:
+            await run_ingestion(project_id, db)
+            await db.commit()
+        except Exception:
+            await db.rollback()
+            logger.exception("Background ingestion failed for project %d", project_id)
+
+
 @router.post(
     "/{project_id}/ingest",
-    status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_202_ACCEPTED,
     summary="Trigger repository ingestion",
 )
 async def ingest_project(
     project_id: int,
+    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
 ) -> dict[str, str]:
-    """Start ingestion synchronously. Returns when the pipeline finishes."""
-    project = await _get_project_or_404(project_id, db)
+    """Enqueue ingestion as a background task. Returns 202 immediately."""
+    project = await get_project_or_404(project_id, db)
 
     if project.status == "ingesting":
         raise HTTPException(
@@ -31,9 +43,9 @@ async def ingest_project(
             detail="Ingestion is already in progress for this project",
         )
 
-    logger.info("Starting ingestion for project %d", project_id)
-    await run_ingestion(project_id, db)
-    return {"message": "Ingestion complete"}
+    logger.info("Queuing background ingestion for project %d", project_id)
+    background_tasks.add_task(_run_ingestion_background, project_id)
+    return {"message": "Ingestion started"}
 
 
 @router.get(
@@ -45,15 +57,4 @@ async def get_project_status(
     project_id: int,
     db: AsyncSession = Depends(get_db),
 ) -> Project:
-    return await _get_project_or_404(project_id, db)
-
-
-async def _get_project_or_404(project_id: int, db: AsyncSession) -> Project:
-    result = await db.execute(select(Project).where(Project.id == project_id))
-    project = result.scalar_one_or_none()
-    if project is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Project {project_id} not found",
-        )
-    return project
+    return await get_project_or_404(project_id, db)

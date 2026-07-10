@@ -23,7 +23,7 @@ def extract_zip(zip_path: Path, dest_dir: Path) -> Path:
             # Zip-slip check: resolve every target path before extraction
             for member in members:
                 target = (dest_dir / member).resolve()
-                if not str(target).startswith(str(dest_dir)):
+                if not target.is_relative_to(dest_dir):
                     raise ValueError(
                         f"Zip-slip attack detected in archive member: {member!r}"
                     )
